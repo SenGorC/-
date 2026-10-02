@@ -526,7 +526,7 @@ function renderDaily(date){
     html+='<div class="match-card" id="mc-'+date+'-'+idx+'">';
     html+='<div class="mhead"><span class="mid">'+m.id+' · '+m.time+'</span><span class="mscore">'+m.score+'</span></div>';
     html+='<div class="mteams">'+m.teams+'</div>';
-    html+='<div class="mrow"><span class="badge '+aCls+'">亚盘'+po.asianR+'</span><span class="badge '+jCls+'">竞彩'+jText+'</span><span class="badge badge-conf">'+p.conf+'</span></div>';
+    html+='<div class="mrow"><span class="badge '+aCls+'">亚盘'+po.asianR+'</span><span class="badge '+jCls+'">'+(jText==='无竞彩'?'无竞彩':'竞彩'+jText)+'</span><span class="badge badge-conf">'+p.conf+'</span></div>';
     html+='<div class="mrow"><span class="badge badge-up">'+p.pickAsian+'</span><span class="badge badge-down">'+p.pickJc+'</span></div>';
     html+='<div class="mdetail">';
     html+='<div class="sec"><div class="sec-title">赛前基本面</div>';
