@@ -77,9 +77,48 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .daily-table td{padding:7px 6px;border-bottom:1px solid #1f2937;}
 .footer{text-align:center;padding:20px;color:#4b5563;font-size:11px;}
 .section-title{font-size:13px;color:#9ca3af;margin:14px 0 8px;font-weight:600;}
+/* 密码登录页 */
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+.login-overlay h2{font-size:22px;color:#fff;font-weight:700;letter-spacing:2px;}
+.login-overlay p{font-size:13px;color:#6b7280;}
+.login-box{display:flex;gap:8px;align-items:center;}
+.login-box input{width:200px;padding:12px 16px;background:#1f2937;border:1px solid #374151;border-radius:8px;color:#fff;font-size:16px;text-align:center;letter-spacing:4px;outline:none;}
+.login-box input:focus{border-color:#60a5fa;}
+.login-box button{padding:12px 20px;background:#60a5fa;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;}
+.login-box button:hover{background:#3b82f6;}
+.login-err{color:#f87171;font-size:12px;height:16px;}
 </style>
 </head>
 <body>
+
+<!-- 密码登录页 -->
+<div class="login-overlay" id="loginOverlay">
+  <h2>豆包竞彩分析台</h2>
+  <p>请输入访问密码</p>
+  <div class="login-box">
+    <input type="password" id="pwdInput" placeholder="密码" maxlength="20" onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()">进入</button>
+  </div>
+  <div class="login-err" id="loginErr"></div>
+</div>
+
+<script>
+function checkPwd(){
+  var pwd=document.getElementById('pwdInput').value;
+  // 密码: 102323 (base64混淆)
+  var correct=atob('MTAyMzIz');
+  if(pwd===correct){
+    localStorage.setItem('db_auth','1');
+    document.getElementById('loginOverlay').style.display='none';
+  }else{
+    document.getElementById('loginErr').textContent='密码错误，请重试';
+    document.getElementById('pwdInput').value='';
+  }
+}
+if(localStorage.getItem('db_auth')==='1'){
+  document.getElementById('loginOverlay').style.display='none';
+}
+</script>
 
 <div class="topbar">
   <h1>豆包竞彩分析台</h1>
