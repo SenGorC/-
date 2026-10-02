@@ -70,10 +70,14 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .case-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .case-filter button{padding:5px 10px;background:#1f2937;border:none;border-radius:5px;font-size:11px;color:#9ca3af;cursor:pointer;}
 .case-filter button.active{background:#1e3a5f;color:#60a5fa;}
-.case-item{background:#111827;border:1px solid #1f2937;border-radius:8px;padding:12px;margin-bottom:8px;font-size:12px;}
-.case-item .ctitle{font-weight:600;color:#fff;margin-bottom:4px;}
-.case-item .cmeta{color:#6b7280;font-size:11px;margin-bottom:6px;}
-.case-item .cdesc{color:#9ca3af;line-height:1.6;}
+.case-table{width:100%;border-collapse:collapse;font-size:12px;}
+.case-table th{background:#1a2332;color:#60a5fa;padding:10px 8px;text-align:left;font-weight:500;border-bottom:2px solid #2d3748;position:sticky;top:0;}
+.case-table td{padding:10px 8px;border-bottom:1px solid #1f2937;vertical-align:top;color:#9ca3af;}
+.case-table tr:hover{background:#1a2332;}
+.case-tag{display:inline-block;padding:2px 8px;border:1px solid;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;}
+.case-ttl{color:#fff;font-weight:600;}
+.case-meta{color:#6b7280;font-size:11px;white-space:nowrap;}
+.case-desc{line-height:1.7;color:#9ca3af;}
 .theory-section{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:14px;margin-bottom:12px;}
 .theory-section h3{font-size:14px;color:#60a5fa;margin-bottom:8px;}
 .theory-section p,.theory-section li{font-size:13px;color:#9ca3af;line-height:1.8;}
@@ -651,11 +655,13 @@ function buildRawHtml(raw){
 // ===== 案例库 =====
 function renderCases(cat){
   var f=cat==='all'?cases:cases.filter(function(c){return c.cat===cat;});
-  var html='';
-  var cm={up:'上盘',down:'下盘',trap:'诱阻盘',mapping:'映射错',rebound:'反弹'};
+  var cm={up:'上盘打出',down:'下盘打出',trap:'诱盘/阻盘',mapping:'映射错误',rebound:'触底反弹'};
+  var cc={up:'#4ade80',down:'#60a5fa',trap:'#fbbf24',mapping:'#f87171',rebound:'#c084fc'};
+  var html='<table class="case-table"><thead><tr><th style="width:90px;">分类</th><th style="width:200px;">案例标题</th><th style="width:160px;">赛事/日期</th><th>详细描述</th></tr></thead><tbody>';
   f.forEach(function(c){
-    html+='<div class="case-item"><div class="ctitle">'+c.title+'</div><div class="cmeta">['+cm[c.cat]+'] '+c.meta+'</div><div class="cdesc">'+c.desc+'</div></div>';
+    html+='<tr><td><span class="case-tag" style="color:'+cc[c.cat]+';border-color:'+cc[c.cat]+';">'+cm[c.cat]+'</span></td><td class="case-ttl">'+c.title+'</td><td class="case-meta">'+c.meta+'</td><td class="case-desc">'+c.desc+'</td></tr>';
   });
+  html+='</tbody></table>';
   document.getElementById('caseList').innerHTML=html;
 }
 document.querySelectorAll('#caseFilter button').forEach(function(b){
