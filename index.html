@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>豆包竞彩分析台</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;color:#e0e0e0;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:100;background:#111827;border-bottom:1px solid #1f2937;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.topbar h1{font-size:17px;font-weight:700;color:#fff;}
+.topbar .ver{font-size:11px;color:#6b7280;}
+.tabs{display:flex;background:#111827;border-bottom:1px solid #1f2937;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:64px;padding:12px 6px;text-align:center;font-size:13px;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab.active{color:#60a5fa;border-bottom-color:#60a5fa;}
+.page{display:none;padding:14px;}
+.page.active{display:block;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.stat-card{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:12px;text-align:center;}
+.stat-card .num{font-size:22px;font-weight:700;}
+.stat-card .lbl{font-size:11px;color:#6b7280;margin-top:3px;}
+.pos{color:#4ade80;}.neg{color:#f87171;}.gold{color:#fbbf24;}.blue{color:#60a5fa;}.gray{color:#9ca3af;}
+.chart-box{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:12px;margin-bottom:14px;}
+.chart-box h3{font-size:13px;color:#9ca3af;margin-bottom:8px;font-weight:500;}
+.chart{width:100%;height:190px;}
+.date-select{display:flex;gap:6px;overflow-x:auto;padding:6px 0 12px;scrollbar-width:none;}
+.date-select::-webkit-scrollbar{display:none;}
+.date-btn{padding:6px 12px;background:#1f2937;border-radius:6px;font-size:12px;color:#9ca3af;white-space:nowrap;cursor:pointer;border:1px solid transparent;}
+.date-btn.active{background:#1e3a5f;color:#60a5fa;border-color:#3b82f6;}
+.match-card{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:14px;margin-bottom:10px;}
+.match-card .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.match-card .mid{font-size:12px;color:#6b7280;}
+.match-card .mtime{font-size:11px;color:#6b7280;}
+.match-card .mteams{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px;}
+.match-card .mscore{font-size:20px;font-weight:700;color:#fbbf24;}
+.match-card .mrow{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.badge-up{background:rgba(74,222,128,0.12);color:#4ade80;}
+.badge-down{background:rgba(248,113,113,0.12);color:#f87171;}
+.badge-hit{background:rgba(74,222,128,0.15);color:#4ade80;}
+.badge-miss{background:rgba(248,113,113,0.15);color:#f87171;}
+.badge-push{background:rgba(156,163,175,0.12);color:#9ca3af;}
+.badge-conf{background:rgba(251,191,36,0.12);color:#fbbf24;}
+.match-card .mdetail{font-size:12px;color:#9ca3af;margin-top:10px;line-height:1.7;display:none;}
+.match-card.expanded .mdetail{display:block;}
+.match-card .mdetail .sec{margin-bottom:8px;}
+.match-card .mdetail .sec-title{font-size:11px;color:#60a5fa;font-weight:600;margin-bottom:4px;border-left:2px solid #60a5fa;padding-left:6px;}
+.match-card .mdetail .sec-title.review{color:#fbbf24;border-left-color:#fbbf24;}
+.match-card .mdetail table{width:100%;border-collapse:collapse;font-size:11px;margin:4px 0;}
+.match-card .mdetail td{padding:3px 4px;border-bottom:1px solid #1f2937;}
+.match-card .mdetail td:first-child{color:#6b7280;width:35%;}
+.match-card .mtoggle{font-size:11px;color:#60a5fa;margin-top:8px;cursor:pointer;text-align:center;padding:6px;background:#1a2332;border-radius:6px;}
+.parlay-card{background:linear-gradient(135deg,#1e3a5f,#111827);border:1px solid #3b82f6;border-radius:10px;padding:14px;margin-bottom:10px;}
+.parlay-card.win{border-color:#4ade80;background:linear-gradient(135deg,#14532d,#111827);}
+.parlay-card.lose{border-color:#f87171;background:linear-gradient(135deg,#450a0a,#111827);}
+.parlay-card .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.parlay-card .ptitle{font-size:14px;font-weight:600;color:#fff;}
+.parlay-card .presult{font-size:14px;font-weight:700;}
+.parlay-card .pmatch{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.parlay-card .pmatch:last-child{border-bottom:none;}
+.case-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.case-filter button{padding:5px 10px;background:#1f2937;border:none;border-radius:5px;font-size:11px;color:#9ca3af;cursor:pointer;}
+.case-filter button.active{background:#1e3a5f;color:#60a5fa;}
+.case-item{background:#111827;border:1px solid #1f2937;border-radius:8px;padding:12px;margin-bottom:8px;font-size:12px;}
+.case-item .ctitle{font-weight:600;color:#fff;margin-bottom:4px;}
+.case-item .cmeta{color:#6b7280;font-size:11px;margin-bottom:6px;}
+.case-item .cdesc{color:#9ca3af;line-height:1.6;}
+.theory-section{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:14px;margin-bottom:12px;}
+.theory-section h3{font-size:14px;color:#60a5fa;margin-bottom:8px;}
+.theory-section p,.theory-section li{font-size:13px;color:#9ca3af;line-height:1.8;}
+.theory-section ul{padding-left:18px;}
+.theory-section .version{font-size:11px;color:#6b7280;margin-bottom:8px;}
+.daily-table{width:100%;border-collapse:collapse;font-size:12px;}
+.daily-table th{background:#1f2937;color:#9ca3af;padding:8px 6px;text-align:left;font-weight:500;position:sticky;top:0;}
+.daily-table td{padding:7px 6px;border-bottom:1px solid #1f2937;}
+.footer{text-align:center;padding:20px;color:#4b5563;font-size:11px;}
+.section-title{font-size:13px;color:#9ca3af;margin:14px 0 8px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>豆包竞彩分析台</h1>
+  <span class="ver">v2.4 · 更新0930</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-page="dashboard">总览</div>
+  <div class="tab" data-page="daily">每日分析</div>
+  <div class="tab" data-page="pnl">盈亏统计</div>
+  <div class="tab" data-page="cases">案例库</div>
+  <div class="tab" data-page="theory">理论SOP</div>
+</div>
+
+<!-- 总览 -->
+<div class="page active" id="page-dashboard">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="num pos">+229</div><div class="lbl">累计盈亏(元)</div></div>
+    <div class="stat-card"><div class="num blue">31.0%</div><div class="lbl">串关命中率</div></div>
+    <div class="stat-card"><div class="num gold">13/42</div><div class="lbl">命中/总组数</div></div>
+    <div class="stat-card"><div class="num gray">10.2%</div><div class="lbl">总回报率</div></div>
+  </div>
+  <div class="chart-box"><h3>累计盈亏曲线（0909-0929）</h3><div id="pnlChart" class="chart"></div></div>
+  <div class="chart-box"><h3>近6日亚盘 vs 竞彩命中率</h3><div id="hitChart" class="chart"></div></div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="num neg">-459</div><div class="lbl">近6日盈亏(元)</div></div>
+    <div class="stat-card"><div class="num blue">55%</div><div class="lbl">近6日亚盘均命中</div></div>
+    <div class="stat-card"><div class="num neg">39%</div><div class="lbl">近6日竞彩均命中</div></div>
+    <div class="stat-card"><div class="num gold">0914</div><div class="lbl">最佳单日+408</div></div>
+  </div>
+</div>
+
+<!-- 每日分析 -->
+<div class="page" id="page-daily">
+  <div class="date-select" id="dateSelect"></div>
+  <div id="dailyContent"></div>
+</div>
+
+<!-- 盈亏统计 -->
+<div class="page" id="page-pnl">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="num blue">4200</div><div class="lbl">总投入(元)</div></div>
+    <div class="stat-card"><div class="num pos">4629</div><div class="lbl">总回报(元)</div></div>
+    <div class="stat-card"><div class="num pos">+429</div><div class="lbl">总盈利(元)</div></div>
+    <div class="stat-card"><div class="num gold">13组</div><div class="lbl">命中串关</div></div>
+  </div>
+  <div class="chart-box"><h3>每日盈亏</h3><div id="dailyPnlChart" class="chart"></div></div>
+  <div class="chart-box"><h3>逐日账目（最新在前）</h3>
+    <div style="max-height:420px;overflow-y:auto;"><table class="daily-table" id="dailyTable"></table></div>
+  </div>
+</div>
+
+<!-- 案例库 -->
+<div class="page" id="page-cases">
+  <div class="case-filter" id="caseFilter">
+    <button class="active" data-cat="all">全部</button>
+    <button data-cat="up">上盘打出</button>
+    <button data-cat="down">下盘打出</button>
+    <button data-cat="trap">诱盘/阻盘</button>
+    <button data-cat="mapping">映射错误</button>
+    <button data-cat="rebound">触底反弹</button>
+  </div>
+  <div id="caseList"></div>
+</div>
+
+<!-- 理论SOP -->
+<div class="page" id="page-theory">
+  <div class="theory-section">
+    <div class="version">当前版本 v2.4 · 2026-09-29 更新</div>
+    <h3>四层分析框架</h3>
+    <ul>
+      <li><b>① 盘口语言</b>：初盘vs即时盘、水位变化、威廉方向、皇冠vs澳门一致性</li>
+      <li><b>② 基本面逻辑</b>：态况差（10分≈1球）、主客场赢盘率、交锋（近两年）、赛程休息、攻防效率</li>
+      <li><b>③ 匹配度判断</b>：盘形（公平盘口vs实际=高开/低开/中性）、一赔高低、平分布、错配方向=价值</li>
+      <li><b>④ 场景过滤</b>：联赛特性、杯赛轮换、对阵类型、特殊因素</li>
+    </ul>
+  </div>
+  <div class="theory-section">
+    <h3>核心理论</h3>
+    <ul>
+      <li><b>反共识理论</b>：公开突出的基本面=庄家诱盘材料，需警惕</li>
+      <li><b>盘形+顺逆</b>：高开+顺=可能阻上；低开+逆=可能诱上；结合基本面判断</li>
+      <li><b>变盘辅助</b>：升盘降水=真看上盘；升盘升水=可能诱上；降盘看交锋区分阻上/真不看好</li>
+      <li><b>客场全胜队</b>：5胜以上客场全胜是真强，不能因"题材好"判诱上</li>
+      <li><b>竞彩映射铁律</b>：-1盘赢1球=让平，+1盘输1球=让平，不博让胜/让负</li>
+    </ul>
+  </div>
+  <div class="theory-section">
+    <h3>国家队比赛修正</h3>
+    <ul>
+      <li>冷门比例高，强弱差距被压缩</li>
+      <li>降盘信号不稳定：交锋碾压+降盘=阻上；交锋劣势+降盘=真不看好</li>
+      <li>0胜队主场可能触底反弹，不直接判下盘</li>
+      <li>深盘（球半以上）上盘风险大，除非态况碾压>15分</li>
+      <li>映射必须保守：赢1球=让平为基准</li>
+    </ul>
+  </div>
+  <div class="theory-section">
+    <h3>版本迭代</h3>
+    <ul>
+      <li>v1.0：基础四层框架</li>
+      <li>v2.0：态况评分校准、盘形判断</li>
+      <li>v2.1：反共识理论、联赛级别理论</li>
+      <li>v2.2：变盘+威廉方向一致性</li>
+      <li>v2.3：竞彩映射精确化、串关精选</li>
+      <li>v2.4：国家队修正、客场全胜队修正、0胜队反弹修正</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">豆包竞彩分析台 · 数据仅供参考 · 理性投注</div>
+
+<script>
+// ===== 每日盈亏数据 =====
+var dailyData=[
+  {date:'0909',pnl:158,cum:158},{date:'0910',pnl:286,cum:444},
+  {date:'0911',pnl:174,cum:618},{date:'0912',pnl:22,cum:640},
+  {date:'0913',pnl:186,cum:826},{date:'0914',pnl:408,cum:1234},
+  {date:'0915',pnl:-200,cum:1034},{date:'0916',pnl:115,cum:1149},
+  {date:'0917',pnl:-200,cum:949},{date:'0918',pnl:263,cum:1212},
+  {date:'0919',pnl:-200,cum:1012},{date:'0920',pnl:-24,cum:988},
+  {date:'0922',pnl:-200,cum:788},{date:'0924',pnl:17,cum:805,asian:'80%',jc:'80%'},
+  {date:'0925',pnl:-300,cum:505,asian:'43%',jc:'29%'},
+  {date:'0926',pnl:24,cum:529,asian:'54%',jc:'54%'},
+  {date:'0927',pnl:-100,cum:429,asian:'56%',jc:'22%'},
+  {date:'0928',pnl:-100,cum:329,asian:'33%',jc:'33%'},
+  {date:'0929',pnl:-100,cum:229,asian:'64%',jc:'18%'}
+];
+
+// ===== 场次详细数据（赛前+赛后）=====
+var matchData={
+'0929':[
+{id:'003',time:'18:00',teams:'藤枝MYFC vs 大阪樱花',score:'1-2',
+ pre:{asian:'受让半一→受让一球（升盘）',will:'主4.33→5升/平3.75→3.8/客1.6→1.5降',tc:'客优14.0',hf:'无交锋',hwr:'83.3%',awr:'33.3%',home:'3胜3平0负进7失2（主场不败）',away:'2胜1平3负进8失14（客场失球多）',key:'升盘到一球可能诱上——利用大阪态况优14题材，实际藤枝主场不败+大阪客场防守差',conf:'⭐⭐⭐',pickAsian:'藤枝+1下',pickJc:'让胜2.37'},
+ post:{asianR:'赢',jcR:false,review:'亚盘对（输1球赢半），竞彩映射错：+1盘输1球=让平，选了让胜。日联赛杯强队客场赢1球居多。'}},
+{id:'004',time:'18:00',teams:'枥木城 vs 广岛三箭',score:'0-2',
+ pre:{asian:'受让球半→受让两球半（皇冠升）',will:'主7→19暴升/平5→7.5/客1.29→1.11暴降',tc:'客优22.3（碾压）',hf:'无交锋',hwr:'50%',awr:'60%',home:'3胜1平2负进15失9',away:'4胜1平1负进16失5（极强）',key:'超深盘+态况碾压22.3+进16球，广岛穿盘能力强。两球盘赢2球=走水',conf:'⭐⭐⭐',pickAsian:'广岛-2上',pickJc:'让负2.36'},
+ post:{asianR:'走水',jcR:false,review:'亚盘走水（赢2球/让2球），竞彩映射错：+2盘赢2球=让平，选了让负。超深盘赢2球刚好走水最常见。'}},
+{id:'005',time:'18:00',teams:'富山胜利 vs 浦和红钻',score:'2-3',
+ pre:{asian:'受让半一→受让一球/球半（升盘）',will:'主4→6升/平3.5→4.2/客1.7→1.36大降',tc:'客优12.6',hf:'富山0胜0平1负',hwr:'33.3%',awr:'40%',home:'2胜3平1负进12失8',away:'5胜0平1负进14失7，但客场进13失15（防守极差）',key:'浦和客场失15球场均2.5，升盘可能诱上——利用5胜1负题材，实际客场防守差',conf:'⭐⭐⭐',pickAsian:'富山+1下',pickJc:'让胜2.05'},
+ post:{asianR:'赢',jcR:false,review:'亚盘对（输1球赢半），竞彩映射错：+1盘输1球=让平。日联赛杯连续赢1球。'}},
+{id:'006',time:'18:00',teams:'山形山神 vs 横滨水手',score:'1-2',
+ pre:{asian:'受让半一→受让一球/球半（升盘）',will:'主4.2→6升/平3.6→4/客1.65→1.4大降',tc:'客优14.4',hf:'山形2胜1平3负',hwr:'50%',awr:'83.3%',home:'3胜1平2负进10失7',away:'3胜2平1负进13失5（客场极强）',key:'横滨客场赢盘率83.3%+威廉大降+升盘=真看好。一球/球半要求赢2球+',conf:'⭐⭐⭐',pickAsian:'横滨-1上',pickJc:'让负2.35'},
+ post:{asianR:'走水',jcR:false,review:'亚盘走水（赢1球/让1球），竞彩映射错：+1盘赢1球=让平。日联赛杯4场全部赢1-2球不穿盘。'}},
+{id:'008',time:'02:45',teams:'苏格兰 vs 瑞士',score:'0-3',
+ pre:{asian:'受让半球稳定',will:'主3.6→3.8/平3.3→3.4/客1.95→1.9降',tc:'客优11.5',hf:'苏格兰1胜2平2负',hwr:'33.3%',awr:'100%',home:'2胜0平4负进4失10（主场差）',away:'4胜2平0负进12失4（不败）',key:'瑞士状态碾压赢盘率100%+威廉降，但客场1胜5平平局多。0926瑞士3-0打破平局规律',conf:'⭐⭐⭐',pickAsian:'瑞士-0.5上',pickJc:'让平3.50'},
+ post:{asianR:'赢',jcR:false,review:'亚盘对（赢3球赢全），竞彩映射错：+1盘赢3球=让负，选了让平。低估瑞士赢球幅度。'}},
+{id:'009',time:'02:45',teams:'捷克 vs 英格兰',score:'0-2',
+ pre:{asian:'受让一球/球半→受让球半（升盘）',will:'主5.8→8.5升/平4→4.8/客1.5→1.3大降',tc:'客优17.0（碾压）',hf:'捷克1胜1平3负',hwr:'-',awr:'100%',home:'2胜2平2负',away:'5胜1平0负进19失4（客场全胜）',key:'英格兰客场全胜+态况碾压17+威廉大降+升盘=真看好。球半要求赢2球+',conf:'⭐⭐⭐⭐',pickAsian:'英格兰-1.5上',pickJc:'让负1.95'},
+ post:{asianR:'赢',jcR:true,review:'双命中！英格兰赢2球穿球半盘（赢半），竞彩让负正确。客场全胜强队判断正确。'}},
+{id:'010',time:'02:45',teams:'斯洛文尼亚 vs 北马其顿',score:'2-0',
+ pre:{asian:'半球/一球稳定',will:'主1.7→1.62降/平3.4→3.4/客5→5.5升',tc:'主优6.9',hf:'斯洛文尼1胜2平2负',hwr:'-',awr:'-',home:'1胜4平1负（平局多）',away:'0胜1平5负进1失18（极差）',key:'北马其顿极差进1失18，0926已0-3瑞士。斯洛文尼虽平局多但对手极差，赢2球+有可能',conf:'⭐⭐⭐',pickAsian:'斯洛文尼-0.75上',pickJc:'让平3.20'},
+ post:{asianR:'赢',jcR:false,review:'亚盘对（赢2球赢全），竞彩映射错：-1盘赢2球=让胜。北马其顿面对强队大败规律延续。'}},
+{id:'011',time:'02:45',teams:'斯洛伐克 vs 哈萨克',score:'2-1',
+ pre:{asian:'球半稳定',will:'主1.25→1.25/平4.75→5/客11→11',tc:'主优11.1',hf:'斯洛伐克0胜0平2负（客优）',hwr:'-',awr:'-',home:'3胜1平2负进13失13（防守差）',away:'1胜2平3负',key:'球半深盘+交锋0胜2负客优+斯洛伐克防守差场均失2.17。赢2球+不稳',conf:'⭐⭐⭐',pickAsian:'哈萨克+1.5下',pickJc:'让负3.71'},
+ post:{asianR:'赢',jcR:false,review:'亚盘对（赢1球下盘赢全），竞彩映射错：-1盘赢1球=让平。深盘赢1球=让平。'}},
+{id:'012',time:'02:45',teams:'卢森堡 vs 冰岛',score:'0-3',
+ pre:{asian:'受让平半稳定（冰岛让）',will:'主3.2→3.3/平3.1→3.1/客2.1→2.1',tc:'客优7.2',hf:'卢森堡1胜2平0负（主优不败）',hwr:'-',awr:'-',home:'1胜1平4负但进8失3（防守强）',away:'0胜3平3负进4失12（0胜极差）',key:'冰岛0胜极差+卢森堡防守强+交锋主优，冰岛让平半是诱上！盘形低开+一赔不防范+平赔低平三重信号',conf:'⭐⭐⭐⭐',pickAsian:'卢森堡+0.25下',pickJc:'让胜1.55'},
+ post:{asianR:'输',jcR:false,review:'双黑！高信心黑单。冰岛0胜队3-0大胜，三重信号全部失效。庄家利用0胜极差题材诱下，实际冰岛触底反弹。'}},
+{id:'013',time:'02:45',teams:'西班牙 vs 克罗地亚',score:'4-1',
+ pre:{asian:'球半→两球（升盘）',will:'主1.3→1.2大降/平4.8→6升/客9.5→10升',tc:'主优15.1',hf:'西班牙2胜2平2负',hwr:'-',awr:'-',home:'3胜3平0负（平局多3平）',away:'4胜2负，客场3胜3负分胜负',key:'两球超深盘+西班牙主场3平（平局多）+克罗地亚3天后战法国。赢3球+难度大',conf:'⭐⭐⭐',pickAsian:'克罗地亚+2下',pickJc:'让负2.00'},
+ post:{asianR:'输',jcR:false,review:'双黑！西班牙4-1赢3球穿两球盘。顶级强队（态况103.5）主场两球盘可以穿，高开+极低赔强防范是真看好。'}},
+{id:'014',time:'02:45',teams:'保加利亚 vs 爱沙尼亚',score:'0-0',
+ pre:{asian:'半球/一球稳定',will:'主1.62→1.75升/平3.4→3.25降/客5→4.6降',tc:'主优3.0（接近）',hf:'保加利亚1胜2平0负',hwr:'-',awr:'-',home:'1胜1平4负进6失15（主场极差场均失2.5）',away:'3胜2平1负',key:'保加利亚主场极差+威廉主胜升=不看好。0926保加利亚1-2卢森堡同模式',conf:'⭐⭐⭐⭐',pickAsian:'爱沙尼亚+0.75下',pickJc:'让负2.18'},
+ post:{asianR:'赢',jcR:true,review:'双命中！保加利亚0-0平，爱沙尼亚不败。主场极差+威廉主胜升判断正确，高信心命中。'}}
+],
+'0928':[
+{id:'003',time:'00:00',teams:'亚美尼亚 vs 黑山',score:'2-3',
+ pre:{asian:'平手→黑山让平半（客升）',will:'-',tc:'-',hf:'-',hwr:'-',awr:'83.3%',home:'-',away:'-',key:'威廉客胜降+黑山赢盘率83.3%',conf:'⭐⭐⭐',pickAsian:'黑山+0下',pickJc:'让负1.40'},
+ post:{asianR:'赢',jcR:true,review:'命中。下盘正确。'}},
+{id:'004',time:'02:45',teams:'土耳其 vs 意大利',score:'1-4',
+ pre:{asian:'平手稳定',will:'主胜降',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'5胜1平0负（客场全胜）',key:'误判威廉主胜降为诱上，实际意大利客场全胜是真强',conf:'⭐⭐⭐',pickAsian:'土耳其-0上',pickJc:'让胜1.50'},
+ post:{asianR:'输',jcR:false,review:'威廉主胜降是诱上！意大利客场5胜1平是真强4-1大胜。客场赢盘率低不能看低强队。'}},
+{id:'005',time:'02:45',teams:'比利时 vs 法国',score:'0-1',
+ pre:{asian:'受让平半稳定',will:'-',tc:'-',hf:'-',hwr:'-',awr:'100%',home:'-',away:'6胜0负（客场全胜）',key:'法国客场6胜0负是真强，但比利时+1输1球=让平',conf:'⭐⭐⭐',pickAsian:'比利时+0.5下',pickJc:'让胜1.87'},
+ post:{asianR:'输',jcR:false,review:'亚盘错+映射错。法国1-0赢。比利时+1输1球=让平，选了让胜。'}},
+{id:'006',time:'02:45',teams:'罗马尼亚 vs 波黑',score:'2-4',
+ pre:{asian:'平半稳定',will:'主胜大升',tc:'-',hf:'罗马尼亚2胜4负客优',hwr:'-',awr:'-',home:'5胜1负',away:'-',key:'威廉主胜大升是真不看好，不是阻上。交锋劣势+升赔=真不看好',conf:'⭐⭐⭐',pickAsian:'罗马尼亚-0.25上',pickJc:'让平3.58'},
+ post:{asianR:'输',jcR:false,review:'威廉主胜大升是真不看好，罗马尼亚2-4大败。'}},
+{id:'007',time:'02:45',teams:'瑞典 vs 波兰',score:'3-1',
+ pre:{asian:'半球→平半（降盘）',will:'客胜降',tc:'-',hf:'瑞典5胜1负碾压',hwr:'-',awr:'-',home:'-',away:'-',key:'降盘是阻上！瑞典交锋碾压，利用近期战绩差阻上',conf:'⭐⭐⭐',pickAsian:'波兰+0.25下',pickJc:'让负1.85'},
+ post:{asianR:'输',jcR:false,review:'皇冠降盘是阻上！瑞典3-1大胜。降盘利用近期战绩差阻上。'}},
+{id:'008',time:'02:45',teams:'北爱尔兰 vs 匈牙利',score:'0-0',
+ pre:{asian:'半球→平半（降盘）',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'4胜1平1负进6失2（场均失0.33）',away:'-',key:'主场防守极强+降盘=下盘',conf:'⭐⭐⭐',pickAsian:'北爱尔兰+0下',pickJc:'让胜1.39'},
+ post:{asianR:'赢',jcR:true,review:'命中。主场防守极强+降盘，下盘正确。'}}
+],
+'0927':[
+{id:'007',time:'-',teams:'德国 vs 希腊',score:'0-1',
+ pre:{asian:'球半',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'主场极强',away:'-',key:'深盘诱上风险',conf:'⭐⭐⭐',pickAsian:'德国上',pickJc:'-'},
+ post:{asianR:'输',jcR:false,review:'深盘诱上！德国主场极强但0-1输希腊。球半盘上盘风险大。'}},
+{id:'008',time:'-',teams:'挪威 vs 葡萄牙',score:'1-2',
+ pre:{asian:'客让平半→主让平半（翻转）',will:'主胜大降',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'-',key:'变盘翻转诱上！强强对话翻转可能诱上',conf:'⭐⭐⭐',pickAsian:'挪威上',pickJc:'胜3.30'},
+ post:{asianR:'输',jcR:false,review:'变盘翻转诱上！皇冠翻转到挪威让平半+威廉主胜大降，结果1-2输。'}}
+],
+'0926':[
+{id:'015',time:'-',teams:'瑞士 vs 北马其顿',score:'3-0',
+ pre:{asian:'-',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'客场6连平',away:'极差',key:'瑞士客场6连平后主场可能打破',conf:'⭐⭐⭐',pickAsian:'瑞士上',pickJc:'-'},
+ post:{asianR:'赢',jcR:false,review:'瑞士3-0大胜，打破客场6连平规律。极端规律不可靠。'}},
+{id:'023',time:'-',teams:'盐湖城 vs 新英格兰',score:'3-0',
+ pre:{asian:'-',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'0胜1平5负（极差）',away:'-',key:'0胜极差队可能触底反弹',conf:'⭐⭐⭐',pickAsian:'盐湖城下',pickJc:'-'},
+ post:{asianR:'输',jcR:false,review:'0胜极差队触底反弹！盐湖城0胜1平5负但3-0大胜。'}}
+],
+'0925':[
+{id:'007',time:'-',teams:'亚美尼亚 vs 拉脱维亚',score:'2-0',
+ pre:{asian:'-',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'0胜极差',away:'-',key:'0胜队主场可能反弹',conf:'⭐⭐⭐',pickAsian:'亚美尼亚下',pickJc:'让负2.05'},
+ post:{asianR:'输',jcR:false,review:'0胜队主场触底反弹！亚美尼亚0胜但2-0赢。'}},
+{id:'009',time:'-',teams:'黑山 vs 塞浦路斯',score:'2-1',
+ pre:{asian:'降盘',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'-',key:'降盘是阻上',conf:'⭐⭐⭐',pickAsian:'黑山下',pickJc:'让负2.06'},
+ post:{asianR:'输',jcR:false,review:'降盘是阻上！黑山降盘后2-1赢。'}},
+{id:'010',time:'-',teams:'波兰 vs 波黑',score:'0-0',
+ pre:{asian:'皇冠升盘澳门不跟',will:'-',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'-',key:'单一机构升盘不跟=诱上',conf:'⭐⭐⭐',pickAsian:'波兰上',pickJc:'让胜2.48'},
+ post:{asianR:'输',jcR:false,review:'皇冠单独升盘诱上！澳门不跟，结果0-0平。'}}
+],
+'0924':[
+{id:'006',time:'-',teams:'荷兰 vs 德国',score:'1-0',
+ pre:{asian:'-',will:'-',tc:'-',hf:'-',hwr:'16.7%',awr:'-',home:'主场赢盘率极低',away:'-',key:'荷兰主场赢盘率16.7%=下盘',conf:'⭐⭐⭐',pickAsian:'德国下',pickJc:'让负1.51'},
+ post:{asianR:'赢',jcR:true,review:'命中。荷兰主场赢盘率16.7%=下盘。'}},
+{id:'007',time:'-',teams:'塞尔维亚 vs 希腊',score:'-',
+ pre:{asian:'升盘',will:'主胜大升',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'-',key:'升盘+威廉主胜大升=诱上',conf:'⭐⭐⭐',pickAsian:'希腊下',pickJc:'让负1.44'},
+ post:{asianR:'赢',jcR:true,review:'命中。升盘+威廉主胜大升=诱上。'}},
+{id:'008',time:'-',teams:'挪威 vs 丹麦',score:'-',
+ pre:{asian:'降盘',will:'主胜大降',tc:'-',hf:'-',hwr:'-',awr:'-',home:'-',away:'-',key:'降盘+威廉主胜大降=阻上',conf:'⭐⭐⭐',pickAsian:'丹麦下',pickJc:'让平3.65'},
+ post:{asianR:'赢',jcR:true,review:'命中。降盘+威廉主胜大降=阻上。'}}
+]
+};
+
+// 串关
+var parlayData={
+'0929':[{m1:'012 卢森堡vs冰岛 让胜(1.55)',h1:false,m2:'014 保加利亚vs爱沙尼亚 让负(2.18)',h2:true,sp:3.38,win:false,pnl:-100}],
+'0928':[{m1:'008 北爱尔兰vs匈牙利 让胜(1.39)',h1:true,m2:'005 比利时vs法国 让胜(1.87)',h2:false,sp:2.60,win:false,pnl:-100}],
+'0927':[{m1:'005 塞尔维亚vs荷兰 让负(1.65)',h1:false,m2:'008 挪威vs葡萄牙 胜(3.30)',h2:false,sp:5.45,win:false,pnl:-100}],
+'0925':[
+{m1:'007 亚美尼亚vs拉脱维亚 让负(2.05)',h1:false,m2:'008 意大利vs比利时 让负(1.65)',h2:true,sp:3.38,win:false,pnl:-100},
+{m1:'006 格鲁吉亚vs北爱尔兰 让负(1.82)',h1:true,m2:'010 波兰vs波黑 让胜(2.48)',h2:false,sp:4.51,win:false,pnl:-100},
+{m1:'009 黑山vs塞浦路斯 让负(2.06)',h1:false,m2:'013 多德勒支vs阿尔梅勒 让胜(1.63)',h2:true,sp:3.36,win:false,pnl:-100}],
+'0924':[
+{m1:'006 荷兰vs德国 让负(1.51)',h1:true,m2:'007 塞尔维亚vs希腊 让负(1.44)',h2:true,sp:2.17,win:true,pnl:117},
+{m1:'004 科索沃vs爱尔兰 让负(1.44)',h1:false,m2:'008 挪威vs丹麦 让平(3.65)',h2:true,sp:5.26,win:false,pnl:-100}]
+};
+
+// 案例库
+var cases=[
+{cat:'mapping',title:'竞彩映射错误：赢1球选了让胜/让负',meta:'0929 003/005/006 · 日联赛杯',desc:'日联赛杯4场全部赢1球，+1/-1盘赢1球=让平。连续3场映射错误。教训：让方赢1球=让平为铁律，不博让胜/让负。'},
+{cat:'mapping',title:'竞彩映射错误：受让方输1球选了让胜',meta:'0928 005 · 欧国联',desc:'比利时+1输1球=让平，选了让胜。受让方输1球=让平，不是让胜。'},
+{cat:'mapping',title:'竞彩映射错误：-1盘赢2球选了让平',meta:'0929 010 · 欧国联',desc:'斯洛文尼亚-1赢2球=让胜，选了让平。让方赢2球+=让胜。'},
+{cat:'trap',title:'皇冠单独升盘诱上',meta:'0925 010 波兰vs波黑 · 欧国联',desc:'皇冠升盘但澳门不跟，结果0-0平。单一机构升盘不跟随=诱上信号。'},
+{cat:'trap',title:'变盘翻转诱上',meta:'0927 008 挪威vs葡萄牙 · 欧国联',desc:'皇冠从葡萄牙让平半翻转到挪威让平半+威廉主胜大降，结果1-2挪威输。强强对话变盘翻转可能诱上。'},
+{cat:'trap',title:'降盘阻上（交锋碾压队）',meta:'0928 007 瑞典vs波兰 · 欧国联',desc:'瑞典交锋5胜1负碾压，皇冠降盘到平半+威廉客胜降，结果3-1瑞典大胜。降盘是利用近期战绩差阻上。'},
+{cat:'trap',title:'降盘真不看好（交锋劣势队）',meta:'0928 006 罗马尼亚vs波黑 · 欧国联',desc:'罗马尼亚交锋2胜4负客优，威廉主胜大升，结果2-4大败。降盘+交锋劣势=真不看好。'},
+{cat:'trap',title:'0胜极差题材诱下',meta:'0929 012 卢森堡vs冰岛 · 欧国联',desc:'冰岛0胜3平3负，盘形低开+一赔不防范+平赔低平三重信号指向冰岛不胜，结果冰岛3-0大胜。庄家利用0胜题材诱下。'},
+{cat:'rebound',title:'0胜队主场触底反弹',meta:'0925 007 亚美尼亚 · 欧国联',desc:'亚美尼亚0胜2平4负，结果2-0赢拉脱维亚。0胜队在主场可能反弹，不能直接判下盘。'},
+{cat:'rebound',title:'0胜队客场大胜',meta:'0929 012 冰岛 · 欧国联',desc:'冰岛0胜3平3负进4失12，结果3-0大胜卢森堡。国家队比赛0胜队反弹频繁。'},
+{cat:'rebound',title:'0胜队美职联反弹',meta:'0926 023 盐湖城 · 美职联',desc:'盐湖城0胜1平5负，结果3-0大胜新英格兰。0胜队不直接判下盘。'},
+{cat:'up',title:'客场全胜强队是真强',meta:'0928 004 意大利 · 欧国联',desc:'意大利客场5胜1平0负，4-1土耳其大胜。客场赢盘率低是因为对手强，不是实力差。不能因"题材好"判诱上。'},
+{cat:'up',title:'客场全胜法国',meta:'0928 005 法国 · 欧国联',desc:'法国客场6胜0负，1-0比利时。客场全胜队不能低估。'},
+{cat:'up',title:'顶级强队超深盘可穿',meta:'0929 013 西班牙 · 欧国联',desc:'西班牙态况103.5，两球盘4-1赢3球穿盘。高开+极低赔强防范是真看好，不是矛盾。'},
+{cat:'down',title:'主场防守极强队下盘',meta:'0928 008 北爱尔兰 · 欧国联',desc:'北爱尔兰主场4胜1平1负进6失2（场均失0.33），降盘后0-0平。主场防守极强+降盘=下盘。'},
+{cat:'down',title:'主场极差队下盘',meta:'0929 014 保加利亚 · 欧国联',desc:'保加利亚主场1胜1平4负进6失15（场均失2.5），威廉主胜升，结果0-0平。主场极差+威廉升=不看好。'},
+{cat:'down',title:'深盘+交锋客优下盘',meta:'0929 011 斯洛伐克 · 欧国联',desc:'斯洛伐克球半让球但交锋0胜2负客优，结果2-1赢1球下盘赢。深盘+心理劣势=下盘。'},
+{cat:'down',title:'主场赢盘率极低下盘',meta:'0924 006 荷兰 · 欧国联',desc:'荷兰主场赢盘率16.7%，结果1-0赢球输盘。主场赢盘率低=下盘信号。'}
+];
+
+// ===== Tab切换 =====
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    this.classList.add('active');
+    document.getElementById('page-'+this.dataset.page).classList.add('active');
+    if(this.dataset.page==='pnl'){initPnlCharts();}
+    if(this.dataset.page==='dashboard'){initDashboard();}
+  });
+});
+
+// ===== 总览 =====
+function initDashboard(){
+  var dates=dailyData.map(function(d){return d.date;});
+  var cums=dailyData.map(function(d){return d.cum;});
+  var c1=echarts.init(document.getElementById('pnlChart'));
+  c1.setOption({
+    tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+    grid:{left:45,right:15,top:15,bottom:25,containLabel:true},
+    xAxis:{type:'category',data:dates,axisLabel:{color:'#6b7280',fontSize:10,rotate:45}},
+    yAxis:{type:'value',axisLabel:{color:'#6b7280',fontSize:10},splitLine:{lineStyle:{color:'#1f2937'}}},
+    series:[{type:'line',data:cums,smooth:true,symbol:'circle',symbolSize:4,
+      lineStyle:{color:'#60a5fa',width:2},
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(96,165,250,0.3)'},{offset:1,color:'rgba(96,165,250,0)'}]}},
+      markLine:{data:[{yAxis:0,lineStyle:{color:'#f87171',type:'dashed'},label:{formatter:'盈亏线',color:'#f87171',fontSize:10}}]}
+    }]
+  });
+  var hd=['0924','0925','0926','0927','0928','0929'];
+  var av=[80,43,54,56,33,64],jv=[80,29,54,22,33,18];
+  var c2=echarts.init(document.getElementById('hitChart'));
+  c2.setOption({
+    tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+    legend:{data:['亚盘','竞彩'],textStyle:{color:'#9ca3af',fontSize:11},top:0},
+    grid:{left:40,right:15,top:30,bottom:25,containLabel:true},
+    xAxis:{type:'category',data:hd,axisLabel:{color:'#6b7280',fontSize:10}},
+    yAxis:{type:'value',max:100,axisLabel:{color:'#6b7280',fontSize:10,formatter:'{value}%'},splitLine:{lineStyle:{color:'#1f2937'}}},
+    series:[
+      {name:'亚盘',type:'bar',data:av,itemStyle:{color:'#60a5fa'},barWidth:16},
+      {name:'竞彩',type:'bar',data:jv,itemStyle:{color:'#f87171'},barWidth:16}
+    ]
+  });
+}
+
+// ===== 盈亏页 =====
+function initPnlCharts(){
+  var dates=dailyData.map(function(d){return d.date;});
+  var pnls=dailyData.map(function(d){return d.pnl;});
+  var c=echarts.init(document.getElementById('dailyPnlChart'));
+  c.setOption({
+    tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+    grid:{left:45,right:15,top:15,bottom:25,containLabel:true},
+    xAxis:{type:'category',data:dates,axisLabel:{color:'#6b7280',fontSize:10,rotate:45}},
+    yAxis:{type:'value',axisLabel:{color:'#6b7280',fontSize:10},splitLine:{lineStyle:{color:'#1f2937'}}},
+    series:[{type:'bar',data:pnls,barWidth:12,
+      itemStyle:{color:function(p){return p.value>=0?'#4ade80':'#f87171';}}
+    }]
+  });
+  var html='<tr><th>日期</th><th>当日盈亏</th><th>累计</th></tr>';
+  dailyData.slice().reverse().forEach(function(d){
+    html+='<tr><td>'+d.date+'</td><td class="'+(d.pnl>=0?'pos':'neg')+'">'+(d.pnl>=0?'+':'')+d.pnl+'</td><td class="'+(d.cum>=0?'pos':'neg')+'">'+d.cum+'</td></tr>';
+  });
+  document.getElementById('dailyTable').innerHTML=html;
+}
+
+// ===== 每日分析 =====
+var availableDates=Object.keys(matchData); // 最新在前（定义顺序已是最新在前）
+var ds=document.getElementById('dateSelect');
+availableDates.forEach(function(d,i){
+  var b=document.createElement('div');
+  b.className='date-btn'+(i===0?' active':'');
+  b.textContent=d;
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.date-btn').forEach(function(x){x.classList.remove('active');});
+    this.classList.add('active');
+    renderDaily(d);
+  });
+  ds.appendChild(b);
+});
+
+function renderDaily(date){
+  var matches=matchData[date]||[];
+  var parlays=parlayData[date]||[];
+  var html='';
+  if(parlays.length>0){
+    html+='<div class="section-title">串关组合</div>';
+    parlays.forEach(function(p){
+      var cls=p.win?'win':'lose';
+      html+='<div class="parlay-card '+cls+'"><div class="phead"><span class="ptitle">二串一 · SP '+p.sp+'</span><span class="presult '+(p.win?'pos':'neg')+'">'+(p.win?'命中 +'+p.pnl:'黑单 '+p.pnl)+'</span></div>';
+      html+='<div class="pmatch"><span>'+p.m1+'</span><span>'+(p.h1?'✅':'❌')+'</span></div>';
+      html+='<div class="pmatch"><span>'+p.m2+'</span><span>'+(p.h2?'✅':'❌')+'</span></div></div>';
+    });
+  }
+  html+='<div class="section-title">逐场分析 ('+matches.length+'场) · 点击展开赛前分析+赛后复盘</div>';
+  matches.forEach(function(m,idx){
+    var p=m.pre,po=m.post;
+    var aCls=po.asianR==='赢'?'badge-up':(po.asianR==='走水'?'badge-push':'badge-down');
+    var jCls=po.jcR?'badge-hit':'badge-miss';
+    html+='<div class="match-card" id="mc-'+date+'-'+idx+'">';
+    html+='<div class="mhead"><span class="mid">'+m.id+' · '+m.time+'</span><span class="mscore">'+m.score+'</span></div>';
+    html+='<div class="mteams">'+m.teams+'</div>';
+    html+='<div class="mrow"><span class="badge '+aCls+'">亚盘'+po.asianR+'</span><span class="badge '+jCls+'">竞彩'+(po.jcR?'命中':'未中')+'</span><span class="badge badge-conf">'+p.conf+'</span></div>';
+    html+='<div class="mrow"><span class="badge badge-up">'+p.pickAsian+'</span><span class="badge badge-down">'+p.pickJc+'</span></div>';
+    html+='<div class="mdetail">';
+    html+='<div class="sec"><div class="sec-title">赛前基本面</div>';
+    html+='<table><tr><td>亚盘</td><td>'+p.asian+'</td></tr><tr><td>威廉</td><td>'+p.will+'</td></tr><tr><td>态况差</td><td>'+p.tc+'</td></tr><tr><td>交锋</td><td>'+p.hf+'</td></tr><tr><td>主/客场赢盘率</td><td>'+p.hwr+' / '+p.awr+'</td></tr><tr><td>主队近6</td><td>'+p.home+'</td></tr><tr><td>客队近6</td><td>'+p.away+'</td></tr></table></div>';
+    html+='<div class="sec"><div class="sec-title">赛前关键判断</div><div style="font-size:12px;line-height:1.7;">'+p.key+'</div></div>';
+    html+='<div class="sec"><div class="sec-title review">赛后复盘</div><div style="font-size:12px;line-height:1.7;color:#fbbf24;">'+po.review+'</div></div>';
+    html+='</div>';
+    html+='<div class="mtoggle" onclick="var el=document.getElementById(\'mc-'+date+'-'+idx+'\');el.classList.toggle(\'expanded\');this.textContent=el.classList.contains(\'expanded\')?\'收起\':\'展开赛前分析+复盘\';">展开赛前分析+复盘</div>';
+    html+='</div>';
+  });
+  document.getElementById('dailyContent').innerHTML=html;
+}
+renderDaily(availableDates[0]);
+
+// ===== 案例库 =====
+function renderCases(cat){
+  var f=cat==='all'?cases:cases.filter(function(c){return c.cat===cat;});
+  var html='';
+  var cm={up:'上盘',down:'下盘',trap:'诱阻盘',mapping:'映射错',rebound:'反弹'};
+  f.forEach(function(c){
+    html+='<div class="case-item"><div class="ctitle">'+c.title+'</div><div class="cmeta">['+cm[c.cat]+'] '+c.meta+'</div><div class="cdesc">'+c.desc+'</div></div>';
+  });
+  document.getElementById('caseList').innerHTML=html;
+}
+document.querySelectorAll('#caseFilter button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#caseFilter button').forEach(function(x){x.classList.remove('active');});
+    this.classList.add('active');
+    renderCases(this.dataset.cat);
+  });
+});
+renderCases('all');
+
+initDashboard();
+</script>
+</body>
+</html>
