@@ -52,6 +52,13 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .match-card .mdetail td{padding:3px 4px;border-bottom:1px solid #1f2937;}
 .match-card .mdetail td:first-child{color:#6b7280;width:35%;}
 .match-card .mtoggle{font-size:11px;color:#60a5fa;margin-top:8px;cursor:pointer;text-align:center;padding:6px;background:#1a2332;border-radius:6px;}
+.daily-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.ds-card{background:#1a2332;border:1px solid #2d3748;border-radius:10px;padding:12px;text-align:center;}
+.ds-card .ds-num{font-size:24px;font-weight:700;}
+.ds-card .ds-num.pos{color:#4ade80;}
+.ds-card .ds-num.neg{color:#f87171;}
+.ds-card .ds-lbl{font-size:12px;color:#9ca3af;margin:2px 0;}
+.ds-card .ds-sub{font-size:11px;color:#6b7280;}
 .parlay-card{background:linear-gradient(135deg,#1e3a5f,#111827);border:1px solid #3b82f6;border-radius:10px;padding:14px;margin-bottom:10px;}
 .parlay-card.win{border-color:#4ade80;background:linear-gradient(135deg,#14532d,#111827);}
 .parlay-card.lose{border-color:#f87171;background:linear-gradient(135deg,#450a0a,#111827);}
@@ -508,6 +515,22 @@ function renderDaily(date){
   var matches=matchData[date]||[];
   var parlays=parlayData[date]||[];
   var html='';
+  // 当日统计汇总
+  var aWin=0,aPush=0,aLose=0,jHit=0,jMiss=0,jNone=0;
+  matches.forEach(function(m){
+    if(m.post.asianR==='赢')aWin++;else if(m.post.asianR==='走水')aPush++;else aLose++;
+    if(m.pre.pickJc&&m.pre.pickJc.indexOf('无竞彩')>=0)jNone++;
+    else if(m.post.jcR)jHit++;else jMiss++;
+  });
+  var aRate=(aWin+aLose)>0?Math.round(aWin/(aWin+aLose)*100):0;
+  var jRate=(jHit+jMiss)>0?Math.round(jHit/(jHit+jMiss)*100):0;
+  var pInvest=parlays.length*100,pReturn=0,pPnl=0;
+  parlays.forEach(function(p){pPnl+=p.pnl;if(p.win)pReturn+=100*p.sp;});
+  html+='<div class="daily-stats">';
+  html+='<div class="ds-card"><div class="ds-num '+(aRate>=50?'pos':'neg')+'">'+aRate+'%</div><div class="ds-lbl">亚盘命中</div><div class="ds-sub">赢'+aWin+' · 走水'+aPush+' · 输'+aLose+'</div></div>';
+  html+='<div class="ds-card"><div class="ds-num '+(jRate>=50?'pos':'neg')+'">'+jRate+'%</div><div class="ds-lbl">竞彩命中</div><div class="ds-sub">中'+jHit+' · 未中'+jMiss+(jNone>0?' · 无竞彩'+jNone:'')+'</div></div>';
+  html+='<div class="ds-card"><div class="ds-num '+(pPnl>=0?'pos':'neg')+'">'+(pPnl>=0?'+':'')+pPnl+'</div><div class="ds-lbl">串关盈亏</div><div class="ds-sub">'+parlays.length+'组 · 投入'+pInvest+' · 回报'+Math.round(pReturn)+'</div></div>';
+  html+='</div>';
   if(parlays.length>0){
     html+='<div class="section-title">串关组合</div>';
     parlays.forEach(function(p){
