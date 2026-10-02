@@ -501,6 +501,7 @@ function renderDaily(date){
     html+='<table><tr><td>亚盘</td><td>'+p.asian+'</td></tr><tr><td>威廉</td><td>'+p.will+'</td></tr><tr><td>态况差</td><td>'+p.tc+'</td></tr><tr><td>交锋</td><td>'+p.hf+'</td></tr><tr><td>主/客场赢盘率</td><td>'+p.hwr+' / '+p.awr+'</td></tr><tr><td>主队近6</td><td>'+p.home+'</td></tr><tr><td>客队近6</td><td>'+p.away+'</td></tr></table></div>';
     html+='<div class="sec"><div class="sec-title">赛前关键判断</div><div style="font-size:12px;line-height:1.7;">'+p.key+'</div></div>';
     html+='<div class="sec"><div class="sec-title review">赛后复盘</div><div style="font-size:12px;line-height:1.7;color:#fbbf24;">'+po.review+'</div></div>';
+    html+='<div class="raw-toggle" onclick="var rc=this.nextElementSibling;rc.classList.toggle(\'open\');this.textContent=rc.classList.contains(\'open\')?\'收起原始数据\':\'展开原始数据（欧赔/亚盘/SP/战绩/交锋/赛程）\';">展开原始数据（欧赔/亚盘/SP/战绩/交锋/赛程）</div><div class="raw-content" id="raw-'+date+'-'+idx+'"></div>';
     html+='</div>';
     html+='<div class="mtoggle" onclick="var el=document.getElementById(\'mc-'+date+'-'+idx+'\');el.classList.toggle(\'expanded\');this.textContent=el.classList.contains(\'expanded\')?\'收起\':\'展开赛前分析+复盘\';">展开赛前分析+复盘</div>';
     html+='</div>';
