@@ -586,6 +586,14 @@ function renderDaily(date){
   html+='<div class="section-title">逐场分析 ('+matches.length+'场) · 点击展开赛前分析+赛后复盘</div>';
   matches.forEach(function(m,idx){
     var p=m.pre,po=m.post;
+    // 查找原始数据获取双方态况评分
+    var rawKey=m.id;
+    var raw=rawData[date]?(rawData[date][rawKey]||rawData[date][rawKey.replace(/^[A-Z]/,'')]):null;
+    var tcHome='-',tcAway='-',tcDiff=p.tc;
+    if(raw&&raw.overview){
+      if(raw.overview['主态况评分']!=null)tcHome=raw.overview['主态况评分'];
+      if(raw.overview['客态况评分']!=null)tcAway=raw.overview['客态况评分'];
+    }
     var aCls=po.asianR==='赢'?'badge-up':(po.asianR==='走水'?'badge-push':'badge-down');
     var jCls=po.jcR?'badge-hit':(p.pickJc&&p.pickJc.indexOf('无竞彩')>=0?'badge-conf':'badge-miss');
     var jText=po.jcR?'命中':(p.pickJc&&p.pickJc.indexOf('无竞彩')>=0?'无竞彩':'未中');
@@ -596,7 +604,7 @@ function renderDaily(date){
     html+='<div class="mrow"><span class="badge badge-up">'+p.pickAsian+'</span><span class="badge badge-down">'+p.pickJc+'</span></div>';
     html+='<div class="mdetail">';
     html+='<div class="sec"><div class="sec-title">赛前基本面</div>';
-    html+='<table><tr><td>亚盘</td><td>'+p.asian+'</td></tr><tr><td>威廉</td><td>'+p.will+'</td></tr><tr><td>态况差</td><td>'+p.tc+'</td></tr><tr><td>交锋</td><td>'+p.hf+'</td></tr><tr><td>主/客场赢盘率</td><td>'+p.hwr+' / '+p.awr+'</td></tr><tr><td>主队近6</td><td>'+p.home+'</td></tr><tr><td>客队近6</td><td>'+p.away+'</td></tr></table></div>';
+    html+='<table><tr><td>亚盘</td><td>'+p.asian+'</td></tr><tr><td>威廉</td><td>'+p.will+'</td></tr><tr><td>态况评分</td><td>主 '+tcHome+' / 客 '+tcAway+'（差：'+tcDiff+'）</td></tr><tr><td>交锋</td><td>'+p.hf+'</td></tr><tr><td>主/客场赢盘率</td><td>'+p.hwr+' / '+p.awr+'</td></tr><tr><td>主队近6</td><td>'+p.home+'</td></tr><tr><td>客队近6</td><td>'+p.away+'</td></tr></table></div>';
     if(p.layer1){
       html+='<div class="sec"><div class="sec-title">四层框架分析 + 历史相似案例</div>';
       html+='<div style="font-size:12px;line-height:1.8;">';
