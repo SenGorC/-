@@ -484,7 +484,7 @@ function initPnlCharts(){
 }
 
 // ===== 每日分析 =====
-var availableDates=Object.keys(matchData); // 最新在前（定义顺序已是最新在前）
+var availableDates=Object.keys(matchData).sort(function(a,b){return parseInt(b)-parseInt(a);}); // 最新在前
 var ds=document.getElementById('dateSelect');
 availableDates.forEach(function(d,i){
   var b=document.createElement('div');
