@@ -540,18 +540,27 @@ function renderDaily(date){
   var html='';
   // 当日统计汇总
   var aWin=0,aPush=0,aLose=0,jHit=0,jMiss=0,jNone=0;
+  var sWin=0,sPush=0,sLose=0; // 精选场次(★★★及以上)
   matches.forEach(function(m){
     if(m.post.asianR==='赢')aWin++;else if(m.post.asianR==='走水')aPush++;else aLose++;
     if(m.pre.pickJc&&m.pre.pickJc.indexOf('无竞彩')>=0)jNone++;
     else if(m.post.jcR)jHit++;else jMiss++;
+    // 精选场次统计
+    var conf=m.pre.conf||'';
+    var starCount=(conf.match(/★/g)||[]).length;
+    if(starCount>=3 && m.pre.pickAsian!=='放弃'){
+      if(m.post.asianR==='赢')sWin++;else if(m.post.asianR==='走水')sPush++;else sLose++;
+    }
   });
   var aRate=(aWin+aLose)>0?Math.round(aWin/(aWin+aLose)*100):0;
   var jRate=(jHit+jMiss)>0?Math.round(jHit/(jHit+jMiss)*100):0;
+  var sRate=(sWin+sLose)>0?Math.round(sWin/(sWin+sLose)*100):0;
+  var sTotal=sWin+sPush+sLose;
   var pInvest=parlays.length*100,pReturn=0,pPnl=0;
   parlays.forEach(function(p){pPnl+=p.pnl;if(p.win)pReturn+=100*p.sp;});
   html+='<div class="daily-stats">';
-  html+='<div class="ds-card"><div class="ds-num '+(aRate>=50?'pos':'neg')+'">'+aRate+'%</div><div class="ds-lbl">亚盘命中</div><div class="ds-sub">赢'+aWin+' · 走水'+aPush+' · 输'+aLose+'</div></div>';
-  html+='<div class="ds-card"><div class="ds-num '+(jRate>=50?'pos':'neg')+'">'+jRate+'%</div><div class="ds-lbl">竞彩命中</div><div class="ds-sub">中'+jHit+' · 未中'+jMiss+(jNone>0?' · 无竞彩'+jNone:'')+'</div></div>';
+  html+='<div class="ds-card"><div class="ds-num '+(sRate>=55?'pos':'neg')+'">'+sRate+'%</div><div class="ds-lbl">精选亚盘命中</div><div class="ds-sub">赢'+sWin+' · 走水'+sPush+' · 输'+sLose+' ('+sTotal+'场)</div></div>';
+  html+='<div class="ds-card"><div class="ds-num '+(aRate>=50?'pos':'neg')+'">'+aRate+'%</div><div class="ds-lbl">全部亚盘命中</div><div class="ds-sub">赢'+aWin+' · 走水'+aPush+' · 输'+aLose+'</div></div>';
   html+='<div class="ds-card"><div class="ds-num '+(pPnl>=0?'pos':'neg')+'">'+(pPnl>=0?'+':'')+pPnl+'</div><div class="ds-lbl">串关盈亏</div><div class="ds-sub">'+parlays.length+'组 · 投入'+pInvest+' · 回报'+Math.round(pReturn)+'</div></div>';
   html+='</div>';
   if(parlays.length>0){
