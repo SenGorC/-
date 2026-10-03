@@ -25,10 +25,17 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .chart-box{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:12px;margin-bottom:14px;}
 .chart-box h3{font-size:13px;color:#9ca3af;margin-bottom:8px;font-weight:500;}
 .chart{width:100%;height:190px;}
-.date-select{display:flex;gap:6px;overflow-x:auto;padding:6px 0 12px;scrollbar-width:none;}
+.date-select{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px;scrollbar-width:none;align-items:flex-start;}
 .date-select::-webkit-scrollbar{display:none;}
+.month-group{flex-shrink:0;min-width:80px;}
 .date-btn{padding:6px 12px;background:#1f2937;border-radius:6px;font-size:12px;color:#9ca3af;white-space:nowrap;cursor:pointer;border:1px solid transparent;}
 .date-btn.active{background:#1e3a5f;color:#60a5fa;border-color:#3b82f6;}
+.month-group{margin-bottom:4px;}
+.month-header{padding:5px 8px;background:#1a2332;border-radius:6px;font-size:12px;color:#60a5fa;cursor:pointer;user-select:none;margin-bottom:2px;}
+.month-header:hover{background:#1e3a5f;}
+.month-arrow{display:inline-block;width:14px;font-size:10px;}
+.month-dates{display:none;flex-wrap:wrap;gap:4px;padding:4px 0;}
+.month-group.open .month-dates{display:flex;}
 .match-card{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:14px;margin-bottom:10px;}
 .match-card .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .match-card .mid{font-size:12px;color:#6b7280;}
@@ -486,17 +493,46 @@ function initPnlCharts(){
 // ===== 每日分析 =====
 var availableDates=Object.keys(matchData).sort(function(a,b){return parseInt(b)-parseInt(a);}); // 最新在前
 var ds=document.getElementById('dateSelect');
-availableDates.forEach(function(d,i){
-  var b=document.createElement('div');
-  b.className='date-btn'+(i===0?' active':'');
-  b.textContent=d;
-  b.addEventListener('click',function(){
-    document.querySelectorAll('.date-btn').forEach(function(x){x.classList.remove('active');});
-    this.classList.add('active');
-    renderDaily(d);
-  });
-  ds.appendChild(b);
+// 按月份分组
+var monthGroups={};
+availableDates.forEach(function(d){
+  var m=d.substring(0,2);
+  if(!monthGroups[m])monthGroups[m]=[];
+  monthGroups[m].push(d);
 });
+var months=Object.keys(monthGroups).sort(function(a,b){return parseInt(b)-parseInt(a);});
+months.forEach(function(m,mi){
+  var group=document.createElement('div');
+  group.className='month-group'+(mi===0?' open':'');
+  var header=document.createElement('div');
+  header.className='month-header';
+  header.innerHTML='<span class="month-arrow">▶</span> '+m+'月 <span style="color:#6b7280;font-size:11px;">('+monthGroups[m].length+'天)</span>';
+  header.addEventListener('click',function(){
+    group.classList.toggle('open');
+    this.querySelector('.month-arrow').textContent=group.classList.contains('open')?'▼':'▶';
+  });
+  group.appendChild(header);
+  var datesDiv=document.createElement('div');
+  datesDiv.className='month-dates';
+  monthGroups[m].forEach(function(d){
+    var b=document.createElement('div');
+    b.className='date-btn';
+    b.textContent=d;
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.date-btn').forEach(function(x){x.classList.remove('active');});
+      this.classList.add('active');
+      renderDaily(d);
+    });
+    datesDiv.appendChild(b);
+  });
+  group.appendChild(datesDiv);
+  ds.appendChild(group);
+});
+// 默认选中最新日期的第一个按钮
+setTimeout(function(){
+  var firstBtn=document.querySelector('.month-group.open .date-btn');
+  if(firstBtn){firstBtn.classList.add('active');renderDaily(availableDates[0]);}
+},10);
 
 function renderDaily(date){
   var matches=matchData[date]||[];
