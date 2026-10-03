@@ -621,8 +621,10 @@ function renderDaily(date){
   // 渲染原始数据
   matches.forEach(function(m,idx){
     var el=document.getElementById('raw-'+date+'-'+idx);
-    if(el && rawData[date] && rawData[date][m.id]){
-      el.innerHTML=buildRawHtml(rawData[date][m.id]);
+    var rawKey=m.id;
+    var raw=rawData[date]?(rawData[date][rawKey]||rawData[date][rawKey.replace(/^[A-Z]/,'')]):null;
+    if(el && raw){
+      el.innerHTML=buildRawHtml(raw);
     }else if(el){
       el.innerHTML='<div style="color:#6b7280;font-size:12px;padding:8px;">无原始数据</div>';
     }
