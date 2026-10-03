@@ -75,6 +75,22 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .case-table td{padding:10px 8px;border-bottom:1px solid #1f2937;vertical-align:top;color:#9ca3af;}
 .case-table tr:hover{background:#1a2332;}
 .case-tag{display:inline-block;padding:2px 8px;border:1px solid;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;}
+.case-card{border:1px solid #1f2937;border-radius:8px;margin-bottom:10px;overflow:hidden;background:#111827;}
+.case-card-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.case-card-header:hover{background:#1a2332;}
+.case-card-title{flex:1;min-width:200px;font-size:14px;font-weight:500;color:#e5e7eb;}
+.case-card-meta{font-size:12px;color:#6b7280;}
+.case-card-result{font-size:12px;font-weight:600;padding:2px 8px;border-radius:4px;}
+.case-card-body{display:none;padding:16px;border-top:1px solid #1f2937;background:#0f172a;}
+.case-card-body.open{display:block;}
+.case-field{margin-bottom:10px;}
+.case-field-label{font-size:11px;color:#60a5fa;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+.case-field-value{font-size:13px;color:#9ca3af;line-height:1.6;}
+.case-field-value.win{color:#4ade80;}
+.case-field-value.lose{color:#f87171;}
+.case-field-value.push{color:#fbbf24;}
+.case-lesson{background:#1a2332;border-left:3px solid #60a5fa;padding:10px 14px;border-radius:0 6px 6px 0;margin-top:12px;}
+.case-lesson .case-field-label{color:#c084fc;}
 .case-ttl{color:#fff;font-weight:600;}
 .case-meta{color:#6b7280;font-size:11px;white-space:nowrap;}
 .case-desc{line-height:1.7;color:#9ca3af;}
@@ -507,16 +523,16 @@ var cases=[
 {cat:'down',title:'主场极差队下盘',meta:'0929 014 保加利亚 · 欧国联',desc:'保加利亚主场1胜1平4负进6失15（场均失2.5），威廉主胜升，结果0-0平。主场极差+威廉升=不看好。'},
 {cat:'down',title:'深盘+交锋客优下盘',meta:'0929 011 斯洛伐克 · 欧国联',desc:'斯洛伐克球半让球但交锋0胜2负客优，结果2-1赢1球下盘赢。深盘+心理劣势=下盘。'},
 {cat:'down',title:'主场赢盘率极低下盘',meta:'0924 006 荷兰 · 欧国联',desc:'荷兰主场赢盘率16.7%，结果1-0赢球输盘。主场赢盘率低=下盘信号。'},
-{cat:'trap',title:'诱上误判重大：高开≠一定诱上',meta:'1002 007 波兰vs罗马尼亚 · 欧国联',desc:'态况差仅1.8分公平盘平半，实际让0.75-1高开0.5球+波兰赢盘16.7%+主胜升赔，判为诱上下盘，结果波兰6-0大屠杀！教训：不能机械判断高开=诱上，要考虑战意（对0分垫底队反弹）和对手防守（罗马尼亚2战失6球）。主胜升赔0.18幅度不大不应过度解读。'},
-{cat:'trap',title:'降盘误读：降盘可能是降压',meta:'1002 004 比利时vs土耳其 · 欧国联',desc:'盘口从1.25降到1，判为不看好比利时，结果3-0大胜穿盘。教训：降盘可能是降压（降低穿盘难度吸引上盘），而非不看好。土耳其0分垫底是重要利空，客场赢盘率66.7%是过去数据不代表当前。'},
-{cat:'trap',title:'降盘误读：平半盘降盘可能诱下',meta:'1002 006 匈牙利vs格鲁吉亚 · 欧国联',desc:'盘口从0.5降到0.25+主胜1.80→2.15大升，判为不看好匈牙利，结果1-0赢。教训：平半盘主队赢球就全赢，降盘可能利用主队近期差诱下。两队同积1分保级战，主场战意强。'},
-{cat:'trap',title:'阻上误判：交锋劣势不能简单判阻上',meta:'1002 011 哈萨克vs摩尔多瓦 · 欧国联',desc:'降盘判为阻上看好哈萨克，结果1-2输。教训：哈萨克最近两次交锋都输摩尔多瓦（0-1,1-2），交锋劣势明显，不能简单解读为降盘阻上。信号不明确时应放弃。'},
-{cat:'down',title:'深盘高估：强强对话平局多',meta:'1002 003 法国vs意大利 · 欧国联',desc:'法国主让1.25+态况98+交锋碾压（最近两次3-1），看好穿盘，结果1-1平。教训：一球球半深盘需要赢2球，A级强强对话平局概率不低，2024年交锋历史参考价值递减。'},
-{cat:'up',title:'主胜降赔+客队赢盘率极低=上盘可靠',meta:'1002 002 塞浦路斯vs亚美尼亚 · 欧国联',desc:'威廉主胜2.30→2.15降赔+亚美尼亚近6赢盘16.7%极差，主让0.25，结果2-0赢全赢。主胜降赔明确看好主队+客队赢盘率硬伤，上盘信号可靠。'},
-{cat:'down',title:'弱队主场受让一球+主场赢盘率高=下盘',meta:'1002 009 法罗群岛vs斯洛伐克 · 欧国联',desc:'法罗群岛主场赢盘66.7%+斯洛伐克客场赢盘33.3%+一球盘走水保护，结果1-1平下盘全赢。弱队主场受让一球，赢1球走水不输，下盘有天然保护。'},
-{cat:'down',title:'球半深盘+主队主场赢盘率极高=下盘',meta:'1002 010 赫尔蒙德vs赫拉克勒斯 · 荷乙',desc:'赫尔蒙德主场赢盘83.3%极强+球半深盘客队需赢2球，结果2-2平下盘全赢。深盘下盘有保护（输1球赢半），主场赢盘率极高时价值大。'},
-{cat:'trap',title:'低开不一定诱上：实力差距客观存在',meta:'1002 001 拉脱维亚vs黑山 · 欧国联',desc:'低开0.37球判为诱上下盘，结果黑山2-1赢上盘赢半。教训：黑山排名第1vs第4+态况客优8.7，实力差距客观存在，低开0.37球在合理范围内，不应过度解读为诱上。'},
-{cat:'trap',title:'信号矛盾时应放弃',meta:'1002 005 乌克兰vs北爱尔兰 · 欧国联',desc:'主胜降赔但主队升水，信号矛盾，选择相信主胜降赔看好上盘，结果0-3惨败。教训：信号矛盾时（主胜降赔但主队升水）应放弃，半球盘无走水保护风险大。'}
+{cat:'trap',title:'诱上误判重大：高开≠一定诱上',type:'诱上误判',date:'1002',matchId:'007',league:'欧国联',teams:'波兰vs罗马尼亚',score:'6-0',handicap:'初盘主让一球 → 即时主让半一（皇冠降盘），澳门一球稳定',odds:'威廉1.44/4/6 → 1.62/3.9/4.6（主胜升0.18，平降0.1，客胜降1.4）',fundamental:'态况主优1.8（几乎持平）| 波兰第3(1分) vs 罗马尼亚第4(0分垫底) | 波兰近6赢盘16.7%，主场赢盘33.3% | 罗马尼亚2战全负进3失6（防守崩盘）| 交锋波兰3胜1负，最近3-1(2017年)',prePick:'罗马尼亚+0.75下',confidence:'★★★★',preReason:'态况差仅1.8分公平盘平半，实际让0.75-1高开0.5球+波兰赢盘16.7%极差+主胜升赔，判为典型诱上',result:'输',review:'波兰6-0大屠杀！最大错误：机械判断"态况差小+高开=诱上"，完全忽略波兰对0分垫底队的反弹动力，以及罗马尼亚2战失6球的防守崩盘。主胜升赔仅0.18幅度不大，皇冠降盘到半一可能是降压而非确认诱上。',lesson:'不能只看态况差和盘口差判断诱上。必须结合战意（保级战主场不能再输）和对手实力（0分垫底+2战失6球防守极差）。高开在对手极弱时可能是合理甚至低开。'},
+{cat:'trap',title:'降盘误读：降盘可能是降压',type:'降盘误读',date:'1002',matchId:'004',league:'欧国联',teams:'比利时vs土耳其',score:'3-0',handicap:'初盘主让一球球半 → 即时主让一球（降盘）',odds:'威廉1.44/4.2/7.5 → 1.5/4/6.5（主胜升0.06，平降0.2，客胜降1.0）',fundamental:'态况主优8.5 | 比利时第2(3分) vs 土耳其第4(0分垫底) | 比利时主场赢盘33.3% | 土耳其客场赢盘66.7%（过去6场）但当前2战全负 | 交锋比利时2胜1平',prePick:'土耳其+1下',confidence:'★★★',preReason:'降盘从1.25到1+主胜升赔，判为不看好比利时。土耳其客场赢盘66.7%高，交锋比利时不占优',result:'输',review:'比利时3-0大胜穿盘。降盘从1.25降到1是降压（降低穿盘难度），而非不看好。土耳其0分垫底是重要利空，客场赢盘66.7%是过去数据不代表当前状态。比利时主场对垫底队实力差距明显。',lesson:'降盘不一定是不看好，也可能是降压（从1.25降到1，穿盘更容易）。客场赢盘率要结合当前赛事排名和状态，0分垫底队的过去数据参考价值低。'},
+{cat:'trap',title:'降盘误读：平半盘降盘可能诱下',type:'降盘误读',date:'1002',matchId:'006',league:'欧国联',teams:'匈牙利vs格鲁吉亚',score:'1-0',handicap:'初盘主让半球 → 即时主让平半（降盘）',odds:'威廉1.80/3.3/4.5 → 2.15/3.1/3.4（主胜暴升0.35！平降0.2，客胜降1.1）',fundamental:'态况主优2.3 | 匈牙利第3(1分) vs 格鲁吉亚第4(1分) | 匈牙利主场赢盘50% | 格鲁吉亚客场赢盘33.3% | 交锋匈牙利1胜1平',prePick:'格鲁吉亚+0.25下',confidence:'★★★',preReason:'降盘+主胜从1.80暴升到2.15，强烈不看好匈牙利。两队同积1分，格鲁吉亚有保级压力',result:'输',review:'匈牙利1-0赢，平半盘全赢。降盘+主胜大升可能是利用匈牙利0胜1平1负的近期差题材诱下。平半盘主队赢球就全赢，上盘有天然优势。保级战主场战意强。',lesson:'平半盘降盘+主胜大升不一定是真不看好，可能是利用主队近期差诱下。平半盘主队赢球全赢、输半，上盘天然占优。保级战主场战意不能忽略。'},
+{cat:'trap',title:'阻上误判：交锋劣势不能简单判阻上',type:'阻上误判',date:'1002',matchId:'011',league:'欧国联',teams:'哈萨克斯坦vs摩尔多瓦',score:'1-2',handicap:'初盘主让半球 → 即时主让平半（降盘）',odds:'威廉1.95/3.2/4.0 → 2.10/3.1/3.6（主胜升0.15）',fundamental:'态况主优7.2 | 哈萨克第3(1分) vs 摩尔多瓦第4(1分) | 哈萨克主场赢盘66.7% | 摩尔多瓦客场赢盘50% | 交锋哈萨克0胜2负（最近0-1,1-2都输！）',prePick:'哈萨克-0.5上',confidence:'★★',preReason:'降盘+主胜升赔，判为阻上（利用交锋劣势制造不稳）。哈萨克主场赢盘66.7%+态况优7.2',result:'输',review:'哈萨克1-2输。交锋最近两次都输摩尔多瓦是重要利空，不能简单解读为降盘阻上。两队同积1分实力接近，半球盘主队必须赢球，无走水保护。信号不明确时应放弃。',lesson:'交锋最近两次都输是真实劣势，不是阻上题材。信号不明确（降盘+交锋劣势）时应放弃，不强行选边。半球盘无走水保护风险大。'},
+{cat:'down',title:'深盘高估：强强对话平局多',type:'深盘高估',date:'1002',matchId:'003',league:'欧国联',teams:'法国vs意大利',score:'1-1',handicap:'主让一球球半稳定（主队升水）',odds:'威廉1.44/4/6 → 1.44/4.33/6（平升0.33，客胜不变）',fundamental:'态况主优8.1（法国98极高）| 法国第1(4分) vs 意大利第2(4分) | 法国主场赢盘66.7% | 意大利客场赢盘33.3% | 交锋法国最近两次3-1赢（2024年）',prePick:'法国-1.25上',confidence:'★★★',preReason:'法国态况98极高+主场赢盘66.7%+交锋碾压（最近两次3-1）。意大利客场赢盘33.3%弱。平赔升不看好平',result:'输',review:'法国1-1平，一球球半盘输。深盘需要赢2球才全赢，A级强强对话平局概率不低。2024年交锋3-1参考价值递减（人员战术都变了）。平赔升被我解读为不看好平，但实际平了。',lesson:'一球球半深盘+强强对话，上盘需谨慎。交锋历史超过1年参考价值递减。平赔升不一定意味着不平，可能只是调整分布。'},
+{cat:'up',title:'主胜降赔+客队赢盘率极低=上盘可靠',type:'主胜降赔',date:'1002',matchId:'002',league:'欧国联',teams:'塞浦路斯vs亚美尼亚',score:'2-0',handicap:'主让平半稳定（主队降水）',odds:'威廉2.30/3.1/2.88 → 2.15/3.1/3.25（主胜降0.15，客胜升0.37）',fundamental:'态况客优1.8（接近）| 塞浦路斯第2(3分) vs 亚美尼亚第3(1分) | 塞浦路斯主场赢盘50% | 亚美尼亚近6赢盘16.7%极差，客场赢盘33.3% | 交锋塞浦路斯2胜1平1负',prePick:'塞浦路斯-0.25上',confidence:'★★★',preReason:'主胜降赔+主队降水明确看好主队。亚美尼亚近6赢盘16.7%极差。态况接近，主场优势让塞浦路斯略优',result:'赢',review:'塞浦路斯2-0赢，平半盘全赢。主胜降赔+客队赢盘率极低的信号可靠。亚美尼亚16.7%赢盘率是硬伤。',lesson:'主胜降赔（明确方向）+客队赢盘率极低（<20%）=上盘可靠信号。平半盘主队赢球全赢，风险可控。'},
+{cat:'down',title:'弱队主场受让一球+主场赢盘率高=下盘',type:'弱队主场受让',date:'1002',matchId:'009',league:'欧国联',teams:'法罗群岛vs斯洛伐克',score:'1-1',handicap:'斯洛伐克客让一球（稳定）',odds:'威廉5.5/3.75/1.6 → 5.5/3.6/1.62（客胜微升）',fundamental:'态况客优12.5 | 法罗群岛第3(2分，2连平) vs 斯洛伐克第1(6分，2连胜) | 法罗群岛主场赢盘66.7% | 斯洛伐克客场赢盘33.3% | 交锋斯洛伐克2胜',prePick:'法罗群岛+1下',confidence:'★★',preReason:'法罗群岛主场赢盘66.7%+斯洛伐克客场赢盘33.3%+一球盘走水保护。法罗群岛2连平不败，主场韧性强',result:'赢',review:'法罗群岛1-1平，+1全赢。弱队主场受让一球，赢1球走水不输，下盘有天然保护。法罗群岛主场韧性确实强。',lesson:'弱队主场受让一球+主场赢盘率>60%=下盘价值。一球盘客队赢1球走水，赢2球才全赢，下盘有保护。'},
+{cat:'down',title:'球半深盘+主队主场赢盘率极高=下盘',type:'深盘下盘',date:'1002',matchId:'010',league:'荷乙',teams:'赫尔蒙德vs赫拉克勒斯',score:'2-2',handicap:'赫拉克勒斯客让球半（稳定）',odds:'威廉5.5/4.2/1.55 → 5.0/4.2/1.6（主胜降0.5，客胜升0.05）',fundamental:'态况客优10.8 | 赫尔蒙德第12(9分) vs 赫拉克勒斯第1(21分，7胜1负) | 赫尔蒙德主场赢盘83.3%极强 | 赫拉克勒斯客场赢盘66.7% | 交锋赫拉克勒斯3胜1平',prePick:'赫尔蒙德+1.5下',confidence:'★★',preReason:'赫尔蒙德主场赢盘83.3%极强+球半深盘客队需赢2球。荷乙虽进攻强但平局也多',result:'赢',review:'赫尔蒙德2-2平，+1.5全赢。主场赢盘率83.3%是硬数据。球半深盘下盘有保护（输1球赢半）。',lesson:'球半深盘+主队主场赢盘率>80%=下盘价值。深盘下盘天然有保护（输1球赢半/走水），主场赢盘率极高时可信度高。'},
+{cat:'trap',title:'低开不一定诱上：实力差距客观存在',type:'低开误判',date:'1002',matchId:'001',league:'欧国联',teams:'拉脱维亚vs黑山',score:'1-2',handicap:'初盘黑山客让半球 → 即时客让半一（升盘）',odds:'威廉4.2/3.25/1.8 → 4.6/3.3/1.73（客胜降0.07，主胜升0.4）',fundamental:'态况客优8.7 | 拉脱维亚第4(1分) vs 黑山第1(6分，2连胜) | 拉脱维亚主场赢盘16.7%极差 | 黑山客场赢盘50% | 交锋黑山2胜1平',prePick:'拉脱维亚+0.75下',confidence:'★★',preReason:'低开0.37球（公平1.12/实际0.75）+黑山客场赢盘50%。升盘降水可能利用黑山2战全胜诱上',result:'输',review:'黑山2-1赢，客让0.75赢半。低开0.37球在合理范围内，不应过度解读为诱上。黑山排名第1vs第4+态况客优8.7，实力差距客观存在。拉脱维亚主场赢盘16.7%极差，受让仍输。',lesson:'低开0.3-0.4球在合理范围内，不一定是诱上。排名差距（第1vs第4）+态况差>8分时，实力差距客观存在。主场赢盘率<20%的队受让也难赢盘。'},
+{cat:'trap',title:'信号矛盾时应放弃',type:'信号矛盾',date:'1002',matchId:'005',league:'欧国联',teams:'乌克兰vs北爱尔兰',score:'0-3',handicap:'主让半球稳定（主队升水）',odds:'威廉1.85/3.3/4.2 → 1.75/3.5/4.75（主胜降0.1，但主队升水！）',fundamental:'态况主优6.3 | 乌克兰第1(4分) vs 北爱尔兰第2(4分) | 乌克兰主场赢盘50% | 北爱尔兰客场赢盘66.7% | 交锋乌克兰2胜',prePick:'乌克兰-0.5上',confidence:'★★',preReason:'主胜降赔+态况优6.3+排名第1。虽然主队升水但选择相信主胜降赔',result:'输',review:'乌克兰0-3惨败。主胜降赔但主队升水，信号矛盾，我强行选了主胜降赔的方向。北爱尔兰客场赢盘66.7%被低估。半球盘无走水保护，输球全输。',lesson:'信号矛盾时（主胜降赔但主队升水）应放弃，不强行选边。半球盘无走水保护风险大。客场赢盘率>60%的客队不能低估。'}
 ];
 
 // ===== Tab切换 =====
@@ -741,11 +757,33 @@ function renderCases(cat){
   var f=cat==='all'?cases:cases.filter(function(c){return c.cat===cat;});
   var cm={up:'上盘打出',down:'下盘打出',trap:'诱盘/阻盘',mapping:'映射错误',rebound:'触底反弹'};
   var cc={up:'#4ade80',down:'#60a5fa',trap:'#fbbf24',mapping:'#f87171',rebound:'#c084fc'};
-  var html='<table class="case-table"><thead><tr><th style="width:90px;">分类</th><th style="width:200px;">案例标题</th><th style="width:160px;">赛事/日期</th><th>详细描述</th></tr></thead><tbody>';
-  f.forEach(function(c){
-    html+='<tr><td><span class="case-tag" style="color:'+cc[c.cat]+';border-color:'+cc[c.cat]+';">'+cm[c.cat]+'</span></td><td class="case-ttl">'+c.title+'</td><td class="case-meta">'+c.meta+'</td><td class="case-desc">'+c.desc+'</td></tr>';
+  var rc={win:'#4ade80',lose:'#f87171',push:'#fbbf24'};
+  var html='';
+  f.forEach(function(c,i){
+    var resultClass=c.result==='赢'?'win':(c.result==='输'?'lose':(c.result==='走水'?'push':''));
+    var resultColor=c.result==='赢'?'#4ade80':(c.result==='输'?'#f87171':(c.result==='走水'?'#fbbf24':'#6b7280'));
+    html+='<div class="case-card">';
+    html+='<div class="case-card-header" onclick="this.nextElementSibling.classList.toggle(\'open\');">';
+    html+='<span class="case-tag" style="color:'+cc[c.cat]+';border-color:'+cc[c.cat]+';">'+(cm[c.cat]||c.cat)+'</span>';
+    html+='<span class="case-card-title">'+(c.title||'')+'</span>';
+    if(c.teams) html+='<span class="case-card-meta">'+c.teams+(c.score?' '+c.score:'')+'</span>';
+    if(c.result) html+='<span class="case-card-result" style="color:'+resultColor+';background:'+resultColor+'15;">'+c.result+'</span>';
+    if(c.meta&&!c.teams) html+='<span class="case-card-meta">'+c.meta+'</span>';
+    html+='<span style="color:#4b5563;font-size:11px;">▼</span>';
+    html+='</div>';
+    html+='<div class="case-card-body">';
+    // 详细字段（新格式）
+    if(c.handicap) html+='<div class="case-field"><div class="case-field-label">盘口</div><div class="case-field-value">'+c.handicap+'</div></div>';
+    if(c.odds) html+='<div class="case-field"><div class="case-field-label">赔率变化</div><div class="case-field-value">'+c.odds+'</div></div>';
+    if(c.fundamental) html+='<div class="case-field"><div class="case-field-label">基本面</div><div class="case-field-value">'+c.fundamental+'</div></div>';
+    if(c.prePick||c.confidence) html+='<div class="case-field"><div class="case-field-label">赛前判断</div><div class="case-field-value">'+(c.prePick||'')+(c.confidence?' '+c.confidence:'')+(c.preReason?'<br>'+c.preReason:'')+'</div></div>';
+    if(c.review) html+='<div class="case-field"><div class="case-field-label">赛后复盘</div><div class="case-field-value '+resultClass+'">'+c.review+'</div></div>';
+    if(c.lesson) html+='<div class="case-lesson"><div class="case-field-label">核心教训</div><div class="case-field-value">'+c.lesson+'</div></div>';
+    // 旧格式兼容
+    if(!c.handicap&&!c.odds&&!c.fundamental&&!c.review&&c.desc) html+='<div class="case-field"><div class="case-field-value">'+c.desc+'</div></div>';
+    if(c.meta&&c.teams) html+='<div class="case-field"><div class="case-field-label">来源</div><div class="case-field-value" style="font-size:11px;color:#6b7280;">'+c.meta+'</div></div>';
+    html+='</div></div>';
   });
-  html+='</tbody></table>';
   document.getElementById('caseList').innerHTML=html;
 }
 document.querySelectorAll('#caseFilter button').forEach(function(b){
