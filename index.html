@@ -66,6 +66,9 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .ds-card .ds-num.neg{color:#f87171;}
 .ds-card .ds-lbl{font-size:12px;color:#9ca3af;margin:2px 0;}
 .ds-card .ds-sub{font-size:11px;color:#6b7280;}
+.conf-breakdown{margin:8px 0 12px 0;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:#9ca3af;}
+.conf-breakdown .cb-title{color:#6b7280;margin-right:8px;}
+.conf-breakdown .cb-item{display:inline-block;margin-right:12px;color:#d1d5db;}
 .parlay-card{background:linear-gradient(135deg,#1e3a5f,#111827);border:1px solid #3b82f6;border-radius:10px;padding:14px;margin-bottom:10px;}
 .parlay-card.win{border-color:#4ade80;background:linear-gradient(135deg,#14532d,#111827);}
 .parlay-card.lose{border-color:#f87171;background:linear-gradient(135deg,#450a0a,#111827);}
@@ -556,6 +559,7 @@ function renderDaily(date){
   // 当日统计汇总
   var aWin=0,aPush=0,aLose=0,jHit=0,jMiss=0,jNone=0;
   var sWin=0,sPush=0,sLose=0; // 精选场次(★★★及以上)
+  var confStats={'★★★★':{w:0,p:0,l:0},'★★★':{w:0,p:0,l:0},'★★':{w:0,p:0,l:0},'放弃':{w:0,p:0,l:0}};
   matches.forEach(function(m){
     var ar=m.post.asianR||'';
     if(ar==='赢')aWin++;else if(ar==='走水')aPush++;else if(ar==='输')aLose++;
@@ -567,6 +571,11 @@ function renderDaily(date){
     var starCount=(conf.match(/★/g)||[]).length;
     if(starCount>=3 && m.pre.pickAsian!=='放弃' && ar){
       if(ar==='赢')sWin++;else if(ar==='走水')sPush++;else sLose++;
+    }
+    // 按信心等级统计
+    var ck=starCount>=4?'★★★★':(starCount===3?'★★★':(starCount>0?'★★':'放弃'));
+    if(ar && confStats[ck]){
+      if(ar==='赢')confStats[ck].w++;else if(ar==='走水')confStats[ck].p++;else confStats[ck].l++;
     }
   });
   var aRate=(aWin+aLose)>0?Math.round(aWin/(aWin+aLose)*100):0;
@@ -580,6 +589,18 @@ function renderDaily(date){
   html+='<div class="ds-card"><div class="ds-num '+(aRate>=50?'pos':'neg')+'">'+aRate+'%</div><div class="ds-lbl">全部亚盘命中</div><div class="ds-sub">赢'+aWin+' · 走水'+aPush+' · 输'+aLose+'</div></div>';
   html+='<div class="ds-card"><div class="ds-num '+(pPnl>=0?'pos':'neg')+'">'+(pPnl>=0?'+':'')+pPnl+'</div><div class="ds-lbl">串关盈亏</div><div class="ds-sub">'+parlays.length+'组 · 投入'+pInvest+' · 回报'+Math.round(pReturn)+'</div></div>';
   html+='</div>';
+  // 信心等级细分
+  var confHtml='<div class="conf-breakdown"><span class="cb-title">信心等级细分：</span>';
+  ['★★★★','★★★','★★','放弃'].forEach(function(ck){
+    var cs=confStats[ck];
+    var ct=cs.w+cs.p+cs.l;
+    if(ct>0){
+      var cr=(cs.w+cs.l)>0?Math.round(cs.w/(cs.w+cs.l)*100):0;
+      confHtml+='<span class="cb-item">'+ck+' '+cr+'%('+cs.w+'/'+cs.l+')</span>';
+    }
+  });
+  confHtml+='</div>';
+  html+=confHtml;
   if(parlays.length>0){
     html+='<div class="section-title">串关组合</div>';
     parlays.forEach(function(p){
