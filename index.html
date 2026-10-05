@@ -74,6 +74,8 @@ body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:#0a0e17;c
 .parlay-card.lose{border-color:#f87171;background:linear-gradient(135deg,#450a0a,#111827);}
 .parlay-card .phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .parlay-card .ptitle{font-size:14px;font-weight:600;color:#fff;}
+.parlay-card.pending{border-color:#fbbf24;background:linear-gradient(135deg,#422006,#111827);}
+.presult.pending{color:#fbbf24;}
 .parlay-card .presult{font-size:14px;font-weight:700;}
 .parlay-card .pmatch{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
 .parlay-card .pmatch:last-child{border-bottom:none;}
@@ -627,10 +629,14 @@ function renderDaily(date){
   if(parlays.length>0){
     html+='<div class="section-title">串关组合</div>';
     parlays.forEach(function(p){
-      var cls=p.win?'win':'lose';
-      html+='<div class="parlay-card '+cls+'"><div class="phead"><span class="ptitle">二串一 · SP '+p.sp+'</span><span class="presult '+(p.win?'pos':'neg')+'">'+(p.win?'命中 +'+p.pnl:'黑单 '+p.pnl)+'</span></div>';
-      html+='<div class="pmatch"><span>'+p.m1+'</span><span>'+(p.h1?'✅':'❌')+'</span></div>';
-      html+='<div class="pmatch"><span>'+p.m2+'</span><span>'+(p.h2?'✅':'❌')+'</span></div></div>';
+      var cls=p.win===null?'pending':(p.win?'win':'lose');
+      var statusText=p.win===null?'待赛':(p.win?'命中 +'+p.pnl:'黑单 '+p.pnl);
+      var statusCls=p.win===null?'pending':(p.win?'pos':'neg');
+      var h1Icon=p.h1===null?'⏳':(p.h1?'✅':'❌');
+      var h2Icon=p.h2===null?'⏳':(p.h2?'✅':'❌');
+      html+='<div class="parlay-card '+cls+'"><div class="phead"><span class="ptitle">二串一 · SP '+p.sp+'</span><span class="presult '+statusCls+'">'+statusText+'</span></div>';
+      html+='<div class="pmatch"><span>'+p.m1+'</span><span>'+h1Icon+'</span></div>';
+      html+='<div class="pmatch"><span>'+p.m2+'</span><span>'+h2Icon+'</span></div></div>';
     });
   }
   // 每日汇总表
